@@ -82,71 +82,71 @@ void beep_update() {
 // ===== TONE SOUNDS =====
 // ERROR: Bip x3 (nhanh)
 void toneError() {
-  for (int i = 0; i < 3; i++) {
-    beep_start(100);
-    delay(100);
+  for (int i = 0; i < TONE_ERROR_COUNT; i++) {
+    beep_start(TONE_ERROR_BEEP_MS);
+    delay(TONE_SHORT_DELAY);
     beep_update();
-    delay(50);
+    delay(TONE_ERROR_INTERVAL_MS);
   }
 }
 
 // INTERNET Disconnect: SOS (bip dài – bip – bip dài)
 void toneInternetDisconnect() {
-  beep_start(300);
-  delay(350);
+  beep_start(TONE_INTERNET_SOS_LONG_MS);
+  delay(TONE_EXTRA_LONG_DELAY);
   beep_update();
-  beep_start(100);
-  delay(150);
+  beep_start(TONE_INTERNET_SOS_SHORT_MS);
+  delay(TONE_MEDIUM_DELAY);
   beep_update();
-  beep_start(100);
-  delay(150);
+  beep_start(TONE_INTERNET_SOS_SHORT_MS);
+  delay(TONE_MEDIUM_DELAY);
   beep_update();
-  beep_start(300);
-  delay(350);
+  beep_start(TONE_INTERNET_SOS_LONG_MS);
+  delay(TONE_EXTRA_LONG_DELAY);
   beep_update();
 }
 
 // INTERNET Connected: Bip ngắn – bip dài
 void toneInternetConnected() {
-  beep_start(100);
-  delay(150);
+  beep_start(TONE_SHORT_BEEP);
+  delay(TONE_MEDIUM_DELAY);
   beep_update();
-  beep_start(300);
-  delay(350);
+  beep_start(TONE_LONG_BEEP);
+  delay(TONE_EXTRA_LONG_DELAY);
   beep_update();
 }
 
 // MODE Enter: Bip dài
 void toneModeEnter() {
-  beep_start(300);
-  delay(350);
+  beep_start(TONE_MODE_ENTER_BEEP_MS);
+  delay(TONE_EXTRA_LONG_DELAY);
   beep_update();
 }
 
 // MODE Out: Bip – bip – bip dài
 void toneModeExit() {
-  for (int i = 0; i < 2; i++) {
-    beep_start(100);
-    delay(150);
+  for (int i = 0; i < TONE_MODE_EXIT_BEEPS; i++) {
+    beep_start(TONE_SHORT_BEEP);
+    delay(TONE_MEDIUM_DELAY);
     beep_update();
   }
-  beep_start(300);
-  delay(350);
+  beep_start(TONE_MODE_EXIT_FINAL_BEEP_MS);
+  delay(TONE_EXTRA_LONG_DELAY);
   beep_update();
 }
 
 // SYSTEM Startup/Reset: Bip dài x1
 void toneSystemStartup() {
-  beep_start(300);
-  delay(350);
+  beep_start(TONE_SYSTEM_STARTUP_BEEP_MS);
+  delay(TONE_EXTRA_LONG_DELAY);
   beep_update();
 }
 
 // ALARM Hour chime: Bip x2
 void toneAlarmChime() {
-  for (int i = 0; i < 2; i++) {
-    beep_start(100);
-    delay(150);
+  for (int i = 0; i < TONE_ALARM_CHIME_COUNT; i++) {
+    beep_start(TONE_SHORT_BEEP);
+    delay(TONE_MEDIUM_DELAY);
     beep_update();
   }
 }
@@ -154,46 +154,46 @@ void toneAlarmChime() {
 // ALARM Sleep reminder: Bip dài – bip – bip (x2)
 void toneAlarmSleepReminder() {
   for (int rep = 0; rep < 2; rep++) {
-    beep_start(300);
-    delay(350);
+    beep_start(TONE_LONG_BEEP);
+    delay(TONE_EXTRA_LONG_DELAY);
     beep_update();
-    beep_start(100);
-    delay(150);
+    beep_start(TONE_SHORT_BEEP);
+    delay(TONE_MEDIUM_DELAY);
     beep_update();
-    beep_start(100);
-    delay(150);
+    beep_start(TONE_SHORT_BEEP);
+    delay(TONE_MEDIUM_DELAY);
     beep_update();
-    delay(200);
+    delay(TONE_LONG_DELAY);
   }
 }
 
 // ALARM Alarm: (bip x3 – pause) x5
 void toneAlarm() {
-  for (int rep = 0; rep < 5; rep++) {
-    for (int i = 0; i < 3; i++) {
-      beep_start(100);
-      delay(100);
+  for (int rep = 0; rep < TONE_ALARM_REPEAT_COUNT; rep++) {
+    for (int i = 0; i < TONE_ALARM_BEEP_COUNT; i++) {
+      beep_start(TONE_SHORT_BEEP);
+      delay(TONE_SHORT_DELAY);
       beep_update();
-      delay(50);
+      delay(TONE_ERROR_INTERVAL_MS);
     }
-    delay(300);
+    delay(TONE_ALARM_PAUSE_MS);
   }
 }
 
 // UX Click: Bip
 void toneClick() {
-  beep_start(100);
-  delay(150);
+  beep_start(TONE_CLICK_BEEP_MS);
+  delay(TONE_MEDIUM_DELAY);
   beep_update();
 }
 
 // UX Double click: Bip bip
 void toneDoubleClick() {
-  for (int i = 0; i < 2; i++) {
-    beep_start(100);
-    delay(100);
+  for (int i = 0; i < TONE_DOUBLE_CLICK_COUNT; i++) {
+    beep_start(TONE_SHORT_BEEP);
+    delay(TONE_SHORT_DELAY);
     beep_update();
-    delay(50);
+    delay(TONE_ERROR_INTERVAL_MS);
   }
 }
 

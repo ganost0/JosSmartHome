@@ -82,4 +82,40 @@
   #define DEBUG_PRINTF(...)
 #endif
 
+// ===== TONE SOUND DURATIONS (milliseconds) =====
+// All tone sounds configurable - adjust these to customize beep patterns
+#define TONE_SHORT_BEEP 100
+#define TONE_LONG_BEEP 300
+#define TONE_SHORT_DELAY 100
+#define TONE_MEDIUM_DELAY 150
+#define TONE_LONG_DELAY 200
+#define TONE_EXTRA_LONG_DELAY 350
+#define TONE_PAUSE_DELAY 300
+
+// ===== TONE PATTERNS =====
+// Error tone: 3 quick beeps
+#define TONE_ERROR_COUNT 3
+#define TONE_ERROR_BEEP_MS TONE_SHORT_BEEP
+#define TONE_ERROR_INTERVAL_MS 50
+
+// Mode Enter/Exit patterns
+#define TONE_MODE_ENTER_BEEP_MS TONE_LONG_BEEP
+#define TONE_MODE_EXIT_BEEPS 2
+#define TONE_MODE_EXIT_FINAL_BEEP_MS TONE_LONG_BEEP
+
+// Alarm patterns
+#define TONE_ALARM_BEEP_COUNT 3
+#define TONE_ALARM_PAUSE_MS 300
+#define TONE_ALARM_REPEAT_COUNT 5
+#define TONE_ALARM_CHIME_COUNT 2
+
+// Internet/System patterns
+#define TONE_INTERNET_SOS_LONG_MS TONE_LONG_BEEP
+#define TONE_INTERNET_SOS_SHORT_MS TONE_SHORT_BEEP
+#define TONE_SYSTEM_STARTUP_BEEP_MS TONE_LONG_BEEP
+
+// Click/UX feedback
+#define TONE_CLICK_BEEP_MS TONE_SHORT_BEEP
+#define TONE_DOUBLE_CLICK_COUNT 2
+
 #endif // CONFIG_H

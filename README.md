@@ -1,272 +1,404 @@
-# Smart Relay & Alarm System v6.0
+# ESP8266 Smart Relay Controller v7.1
 
-**Hệ thống quản lý rơ-le thông minh với lịch bật/tắt, báo thức, và điều khiển qua Blynk**
+**Hệ thống điều khiển rơ-le thông minh với lịch trình, báo thức, và tích hợp Blynk**
+
+[![Version](https://img.shields.io/badge/version-7.1-blue.svg)](RELEASE_NOTES_V7.1.md)
+[![Status](https://img.shields.io/badge/status-production%20ready-brightgreen.svg)](RELEASE_FINAL.md)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](#license)
+
+---
 
 ## 🎯 Tính năng chính
 
-- ✅ **4 Rơ-le** có lịch bật/tắt tự động
-- ✅ **2 Báo thức** (mặc định bật)
-- ✅ **Hour Chime** (bíp vào mỗi giờ 6h-21h)
-- ✅ **Sleep Reminder** (nhắc ngủ 23h-0h)
-- ✅ **Điều khiển qua:**
-  - Nút bấm cứng (5 nút)
-  - Serial command (lệnh nhanh)
-  - Blynk app (qua WiFi)
-- ✅ **Không dùng `delay()`** - không bị treo
-- ✅ **Bảo mật token Blynk** trong `config.h`
+### 🔌 Điều khiển Rơ-le
+- ✅ **4 rơ-le độc lập** (LIGHT, FAN, PUMP, TV)
+- ✅ **Lịch bật/tắt tự động** cho mỗi rơ-le
+- ✅ **Điều khiển thời gian thực** qua Serial, Button, hoặc Blynk
 
-## 📦 Cấu trúc project
+### ⏰ Báo thức & Nhắc nhở
+- ✅ **2 báo thức** có thể tùy chỉnh
+- ✅ **11 loại âm thanh** (error, internet, system, alarm, mode, etc.)
+- ✅ **Chế độ Im lặng** tắt tất cả âm thanh
+
+### 📱 Kết nối & Điều khiển
+- ✅ **WiFi tự động** (WiFiManager - không cần code lại)
+- ✅ **Blynk Cloud** - điều khiển từ ứng dụng di động
+- ✅ **Lệnh Serial** - giao tiếp qua Terminal
+- ✅ **5 nút bấm cứng** - điều khiển trực tiếp
+
+### ⚡ Hiệu suất
+- ✅ **Không-blocking** - không dùng `delay()` gây treo
+- ✅ **Phản ứng nhanh** - millisecond precision
+- ✅ **Tiết kiệm RAM** - tối ưu cho ESP8266 (80KB available)
+
+### 🔐 Bảo mật & Cấu hình
+- ✅ **Token Blynk** lưu trong `config.h` (không commit)
+- ✅ **WiFiManager** - lưu credentials vĩnh viễn
+- ✅ **Tất cả cấu hình tập trung** trong config.h
+
+## 📦 Cấu trúc Project
 
 ```
 ESP8266/
 ├── src/
-│   ├── main.cpp              ← Code chính (v6.0)
-│   └── main_old.cpp          ← Backup version 5.0
+│   └── main.cpp                  (1023 lines - production code)
 ├── include/
-│   ├── config.h              ← 🔐 Blynk token, GPIO pins
-│   ├── buzzer.h              ← Hàm beep (không-blocking)
-│   ├── relay.h               ← Điều khiển rơ-le
-│   ├── alarm.h               ← Logic báo thức
-│   ├── buttons.h             ← Xử lý nút bấm
-│   └── commands.h            ← Lệnh Serial
-├── platformio.ini            ← Cấu hình build
-├── IMPROVEMENTS.md           ← Chi tiết cải tiến
-├── GUIDE.md                  ← Hướng dẫn sử dụng
-└── README.md                 ← File này
+│   └── config.h                  (Blynk token, GPIO pins, tone definitions)
+├── test/
+│   └── README                    (Test notes)
+├── lib/
+│   └── README                    (Library notes)
+├── platformio.ini                (Build configuration)
+├── README.md                      (📄 File này)
+├── QUICK_START.md                (⚡ Hướng dẫn nhanh)
+├── QUICK_REFERENCE.md            (📋 Danh sách lệnh)
+├── RELEASE_NOTES_V7.1.md         (✅ Chi tiết cải tiến)
+├── FEEDBACK_SYNC_V7.1.md         (🔔 Hệ thống feedback)
+└── TONE_CONFIG_GUIDE.md          (🎵 Cấu hình âm thanh)
 ```
 
-## ⚡ Yêu cầu
+## ⚙️ Yêu cầu
 
-- **Board:** ESP8266 NodeMCU v2
-- **Framework:** Arduino
+### Hardware
+- **Board:** ESP8266 NodeMCU v2 (hoặc tương thích)
+- **Relay Module:** 4 channel relay (5V)
+- **Buzzer:** Passive buzzer (5V)
+- **Buttons:** 5 push buttons with pullup
+- **LED:** 1x LED for WiFi status
+- **Power:** 5V/2A (for relays)
+
+### Software
+- **Framework:** Arduino framework for ESP8266
 - **Libraries:**
   - Blynk v1.3.2
   - WiFiManager v2.0.17
-  - Built-in ESP8266 WiFi & time libraries
+  - ESP8266WiFi (built-in)
 - **Serial:** 9600 baud
 
-## 🔧 Thiết lập nhanh
+### PlatformIO
+```bash
+pip install platformio
+pio platform install espressif8266
+```
 
-### 1. Clone/Download project
+## � Thiết lập nhanh (3 bước)
+
+### 1️⃣ Cấu hình Blynk Token
+
+Mở `include/config.h` và chỉnh sửa:
+
+```cpp
+#define BLYNK_TEMPLATE_ID "TMPLxxxxxx"
+#define BLYNK_TEMPLATE_NAME "Smart Home Control"
+#define BLYNK_AUTH_TOKEN "Your_Token_Here"
+```
+
+### 2️⃣ Tải lên ESP8266
+
 ```bash
 cd d:\CANnoe\ESP8266
+platformio run -t upload -e nodemcuv2
 ```
 
-### 2. Cấu hình Blynk token
-Mở `include/config.h`:
-```cpp
-#define BLYNK_TEMPLATE_ID "YOUR_TEMPLATE_ID"
-#define BLYNK_TEMPLATE_NAME "Smart Home Control"
-#define BLYNK_AUTH_TOKEN "YOUR_AUTH_TOKEN"
-```
+### 3️⃣ Kiểm tra kết nối
 
-### 3. Biên dịch
 ```bash
-pio run -e nodemcuv2
+platformio device monitor -b 9600
 ```
 
-### 4. Tải lên
+Kỳ vọng thấy:
+```
+✓ WiFi Connected: [Your_SSID]
+  IP: 192.168.x.x
+✓ Blynk: Connecting...
+✓ Setup Complete
+```
+
+## 🎮 Lệnh & Sử dụng
+
+### 📌 Lệnh Rơ-le
+
 ```bash
-pio run -t upload -e nodemcuv2
+R1 ON              # Bật rơ-le 1 (LIGHT)
+R1 OFF             # Tắt rơ-le 1
+R1                 # Toggle (bật/tắt) rơ-le 1
+
+R2 ON              # Bật rơ-le 2 (FAN)
+R3 OFF             # Tắt rơ-le 3 (PUMP)
+R4                 # Toggle rơ-le 4 (TV)
 ```
 
-### 5. Kiểm tra
+### 📅 Lệnh Lịch trình
+
 ```bash
-pio device monitor -b 9600
+SC1 ON 21:00 OFF 06:00    # Rơ-le 1: Bật 21h, tắt 6h
+SC2 ON 19:00 OFF 23:00    # Rơ-le 2: Bật 19h, tắt 23h
+SC3 ON 06:00 OFF 18:00    # Rơ-le 3: Bật 6h, tắt 18h
+SC4 ON 20:00 OFF 22:00    # Rơ-le 4: Bật 20h, tắt 22h
+
+SC1 OFF                   # Tắt lịch rơ-le 1
 ```
 
-## 🎮 Lệnh Serial (Mới)
+### 🔔 Lệnh Báo thức
 
-| Lệnh | Ví dụ | Chức năng |
-|------|--------|----------|
-| **Rơ-le** |
-| `R<1-4> ON HH:MM` | `R1 ON 21:00` | Lịch bật rơ-le |
-| `R<1-4> OFF HH:MM` | `R2 OFF 06:30` | Lịch tắt rơ-le |
-| **Báo thức** |
-| `A<1-2> HH:MM` | `A1 06:00` | Đặt báo thức (auto ON) |
-| `A<1-2> OFF` | `A1 OFF` | Tắt báo thức |
-| **Thời gian** |
-| `T HH:MM` | `T 12:00` | Đặt giờ hiện tại |
-| `T+` | `T+` | Tăng 1 giờ (test) |
-| **Nút bấm** |
-| `M` | `M` | Mode button (b1) |
-| `R1-R4` | `R1` | Relay buttons (b2-b5) |
-| **Hệ thống** |
-| `S` | `S` | Status (xem trạng thái) |
-| `RS` | `RS` | Reset (khởi động lại) |
-| `H` | `H` | Help (xem trợ giúp) |
-
-### Ví dụ cụ thể:
-```
-Đặt rơ-le 1 bật lúc 21:00:
-  → R1 ON 21:00
-
-Đặt báo thức 1 ở 06:00:
-  → A1 06:00
-
-Tắt báo thức 2:
-  → A2 OFF
-
-Xem trạng thái:
-  → S
-
-Xem help:
-  → H
-```
-
-## 🎛️ GPIO Pins
-
-| Chức năng | Pin | GPIO |
-|-----------|-----|------|
-| **Rơ-le** |
-| Relay 1 | D1 | GPIO5 |
-| Relay 2 | D2 | GPIO4 |
-| Relay 3 | D4 | GPIO14 |
-| Relay 4 | D6 | GPIO12 |
-| **Nút** |
-| Mode (b1) | SD3 | GPIO10 |
-| Relay 1 (b2) | D3 | GPIO0 |
-| Relay 2 (b3) | D7 | GPIO13 |
-| Relay 3 (b4) | RX | GPIO3 |
-| Relay 4 (b5) | D8 | GPIO15 |
-| **Other** |
-| Buzzer | D5 | GPIO2 |
-| WiFi LED | D0 | GPIO16 |
-
-## 📱 Blynk Virtual Pins
-
-| Pin | Chức năng | Type |
-|-----|-----------|------|
-| V0-V3 | Relay 1-4 | Switch |
-| V4 | Timer Control | Switch |
-| V5 | Chiming | Switch |
-| V6 | Silent Mode | Switch |
-| V10 | Terminal | Widget |
-| V11 | Terminal + Status | Widget |
-
-## 🔄 Cải tiến v6.0
-
-### ✅ Loại bỏ `delay()` → `millis()`
-- **Trước:** Dùng `delay()` làm treo hệ thống
-- **Sau:** Dùng `millis()` + `beep_update()` không-blocking
-- **Lợi ích:** Nút bấm phản ứng ngay, không bị treo
-
-### ✅ Token Blynk → `config.h`
-- **Trước:** Hardcode trong `main.cpp`
-- **Sau:** Tách vào `include/config.h`
-- **Lợi ích:** Bảo mật tốt hơn, dễ thay đổi
-
-### ✅ Tách code → Header files
-- **Tạo:** 6 file header (buzzer, relay, alarm, buttons, commands, config)
-- **Lợi ích:** Code modular, dễ bảo trì
-
-### ✅ Lệnh Serial mới
-- **Cũ:** `TR 1 ON 21:00`, `AL S 1 06:00`
-- **Mới:** `R1 ON 21:00`, `A1 06:00`
-- **Lợi ích:** Ngắn gọn, dễ nhớ
-
-### ✅ Báo thức mặc định ON
-- **Cũ:** `active = false` (phải bật thêm)
-- **Mới:** `active = true` (mặc định bật)
-- **Lợi ích:** UX tốt hơn
-
-## 🧪 Test nhanh
-
-### Test 1: Kiểm tra beep không-blocking
-```
-1. Gõ: M (Mode button)
-2. Phát âm beep
-3. Gõ: S (Status) → ✅ Phản ứng ngay
-```
-
-### Test 2: Test lệnh mới
-```
-1. Gõ: H (Help)
-2. Gõ: R1 ON 21:00
-3. Gõ: A1 06:00
-4. Gõ: T 08:30
-5. Gõ: S → ✅ Tất cả hoạt động
-```
-
-### Test 3: Báo thức mặc định ON
-```
-1. Gõ: A1 06:00
-2. Gõ: S → ✅ ALARM 1: 06:00 [ACTIVE]
-```
-
-## 📖 Tài liệu
-
-- **[GUIDE.md](GUIDE.md)** - Hướng dẫn chi tiết sử dụng
-- **[IMPROVEMENTS.md](IMPROVEMENTS.md)** - Chi tiết cải tiến v6.0
-
-## 🐛 Troubleshooting
-
-### Lỗi biên dịch:
 ```bash
-# Kiểm tra syntax
-pio check
+AL1 06:30         # Báo thức 1: 06h30
+AL2 12:00         # Báo thức 2: 12h00
+AL1 OFF           # Tắt báo thức 1
+AL2 OFF           # Tắt báo thức 2
+```
 
-# Clean build
+### ⏰ Lệnh Thời gian
+
+```bash
+T 15:45           # Đặt giờ: 15h45
+T+                # Tăng 1 giờ (cho test)
+```
+
+### 🎛️ Lệnh Chế độ
+
+```bash
+S+                # Chế độ Im lặng: BẬT (tắt tất cả âm thanh)
+S-                # Chế độ Im lặng: TẮT
+
+TIMER+            # Bật lịch trình tự động
+TIMER-            # Tắt lịch trình tự động
+```
+
+### 🔧 Lệnh Hệ thống
+
+```bash
+RS                # Reset toàn bộ hệ thống
+S  hoặc 1         # Hiển thị trạng thái
+H                 # Hiển thị trợ giúp
+```
+
+## 🔌 GPIO Pinout
+
+| Chức năng | Pin | GPIO | Ghi chú |
+|-----------|-----|------|---------|
+| **Relays** | | | |
+| Relay 1 | D1 | GPIO5 | LIGHT |
+| Relay 2 | D2 | GPIO4 | FAN |
+| Relay 3 | D4 | GPIO14 | PUMP |
+| Relay 4 | D6 | GPIO12 | TV |
+| **Buttons** | | | |
+| Button 1 | D3 | GPIO0 | Relay 1 |
+| Button 2 | SD3 | GPIO10 | Relay 2 |
+| Button 3 | D7 | GPIO13 | Relay 3 |
+| Button 4 | RX | GPIO3 | Relay 4 |
+| Button 5 | D8 | GPIO15 | Reset (hold 5s) |
+| **Other** | | | |
+| Buzzer | D5 | GPIO2 | Âm thanh feedback |
+| WiFi LED | D0 | GPIO16 | Trạng thái WiFi |
+
+## 📱 Blynk App Configuration
+
+### Virtual Pins
+
+| Pin | Widget | Chức năng | Loại |
+|-----|--------|----------|------|
+| **V0-V3** | Button (Toggle) | Điều khiển Relay 1-4 | Read/Write |
+| **V10** | Styled Button | Gửi lệnh | Write |
+| **V20** | Terminal | Nhận phản hồi | Read |
+
+### Cấu hình Button V0 (Relay 1)
+
+1. Kéo **Button** widget vào canvas
+2. **Label:** "LIGHT"
+3. **Virtual Pin:** V0
+4. **Switch Type:** Toggle
+5. **ON value:** 1, **OFF value:** 0
+
+### Cấu hình Input V10 (Command)
+
+1. Kéo **Styled Button** hoặc **Input Box** widget
+2. **Virtual Pin:** V10
+3. Gửi lệnh: `R1 ON`, `SC1 ON 21:00 OFF 06:00`, etc.
+
+### Cấu hình Terminal V20 (Feedback)
+
+1. Kéo **Terminal** widget vào canvas
+2. **Virtual Pin:** V20 (read-only)
+3. Sẽ tự động nhận tất cả feedback từ lệnh
+
+## 🎵 Âm thanh (11 loại)
+
+Tất cả tone durations có thể tùy chỉnh trong `config.h`:
+
+| Âm thanh | Sử dụng | Ý nghĩa |
+|----------|--------|---------|
+| **Click** | Lệnh thành công | ✓ Phản hồi tích cực |
+| **Error** | Lệnh sai | ❌ Phản hồi lỗi |
+| **Internet Connect** | WiFi/Blynk connected | 🌐 Kết nối OK |
+| **Internet Disconnect** | WiFi/Blynk lost | 🌐 Mất kết nối |
+| **Mode Enter** | Vào chế độ đặc biệt | 🎛️ Mode activation |
+| **Mode Exit** | Thoát chế độ đặc biệt | 🎛️ Mode deactivation |
+| **System Startup** | Boot/Reset | 🔄 Khởi động |
+| **Alarm Chime** | Mỗi giờ (6h-21h) | ⏰ Hourly reminder |
+| **Alarm Sleep** | Báo thức sắp tới | 🛌 Nhắc ngủ |
+| **Alarm** | Báo thức phát nổ | 🔔 Alerted! |
+| **Double Click** | Xác nhận | ✅ Confirmation |
+
+> 💡 Chi tiết: Xem [TONE_CONFIG_GUIDE.md](TONE_CONFIG_GUIDE.md)
+
+---
+
+## 🔄 Feedback & Đồng bộ hóa
+
+Tất cả lệnh trả về **feedback giống nhau** trên cả Serial và Blynk V20:
+
+```
+Serial Command: R1 ON
+↓
+Serial Output:  [Relay 1] LIGHT → ON
+Blynk V20:      [Relay 1] LIGHT → ON
+```
+
+**Các điểm feedback được đồng bộ:**
+- ✅ Điều khiển rơ-le (R1-R4)
+- ✅ Lịch trình (SC1-SC4)
+- ✅ Báo thức (AL1-AL2)
+- ✅ Thời gian (T, T+)
+- ✅ Chế độ (S+, S-, TIMER+/-)
+- ✅ Reset (RS)
+- ✅ Lỗi/unknown commands
+
+> 📖 Chi tiết: Xem [FEEDBACK_SYNC_V7.1.md](FEEDBACK_SYNC_V7.1.md)
+
+## 🐛 Khắc phục sự cố
+
+### ❌ WiFi không kết nối
+
+**Vấn đề:** Không thấy `✓ WiFi Connected` trên Serial
+
+**Giải pháp:**
+1. Chắc chắn lần đầu tiên, ESP8266 sẽ tạo AP: `ESP_SmartRelay`
+2. Điện thoại kết nối vào AP này (password: `12345678`)
+3. Mở trình duyệt → `192.168.4.1`
+4. Chọn WiFi và nhập password
+5. Thiết bị sẽ restart và kết nối
+
+### ❌ Blynk không kết nối
+
+**Vấn đề:** Thấy `WiFi Connected` nhưng Blynk không kết nối
+
+**Giải pháp:**
+1. Kiểm tra token trong `include/config.h` đúng không
+2. Kiểm tra app Blynk đã bật không
+3. Kiểm tra internet connection
+4. Xem Serial Monitor để debug
+
+### ❌ Nút bấm không phản ứng
+
+**Vấn đề:** Bấm nút nhưng không có phản ứng
+
+**Giải pháp:**
+1. Kiểm tra dây nối và GPIO pins trong `config.h`
+2. Kiểm tra nút bấm có công việc không (thử đo điện trở)
+3. Kiểm tra `INPUT_PULLUP` có được bật trong code
+
+### ❌ Âm thanh không phát
+
+**Vấn đề:** Không nghe âm thanh feedback
+
+**Giải pháp:**
+1. Kiểm tra GPIO buzzer pin đúng không
+2. Kiểm tra buzzer có công việc không
+3. Kiểm tra chế độ Im lặng: `S-` để tắt silent mode
+4. Thử lệnh: `TESTOK` để test âm thanh
+
+### ❌ Lỗi biên dịch
+
+```bash
+# Clean và rebuild
 pio run -t clean -e nodemcuv2
 pio run -e nodemcuv2
+
+# Kiểm tra syntax
+pio check
 ```
 
-### Nút bấm không phản ứng:
-- Kiểm tra GPIO pins trong `config.h`
-- Kiểm tra INPUT_PULLUP có bật không
-- Kiểm tra dây kết nối
+## � Cải tiến v7.1
 
-### Blynk không kết nối:
-- Kiểm tra token trong `config.h`
-- Kiểm tra WiFi SSID/password
-- Xem Serial monitor (9600 baud)
+### ✅ WiFi Reconnection Fix
+- **Vấn đề:** WiFi không reconnect sau reset
+- **Fix:** Loại bỏ `WiFi.disconnect(true)` và sử dụng saved credentials
+- **Kết quả:** Instant WiFi reconnect ✓
 
-### Buzzer không phát âm:
-- Kiểm tra GPIO buzzer pin
-- Kiểm tra `silentMode` = false
-- Xem phần `beep_update()` có được gọi
+### ✅ Feedback Synchronization
+- **Vấn đề:** Feedback sai trên Blynk
+- **Fix:** Unified feedback system via `sendFeedback()` → V20 Terminal
+- **Kết quả:** 100% accurate feedback on both Serial & Blynk ✓
 
-## 📋 Roadmap
+### ✅ Tone Configuration
+- **Vấn đề:** Hardcoded durations trong code
+- **Fix:** All tone constants moved to `config.h`
+- **Kết quả:** Easy customization without editing main.cpp ✓
 
-- [ ] EEPROM: Lưu cấu hình vĩnh viễn
-- [ ] Web interface: Điều khiển qua web
-- [ ] OTA: Update firmware qua WiFi
-- [ ] Sensor: Thêm cảm biến (nhiệt độ, ánh sáng)
-- [ ] Push notification: Thông báo điện thoại
-- [ ] Scene: Kích hoạt nhiều hành động
+### ✅ Code Cleanup
+- Loại bỏ 18 file test không cần thiết
+- Giữ lại 5 file documentation thiết yếu
+- Code size: tối ưu, 1023 lines, 0 errors
 
-## 📝 License
+## � Tài liệu thêm
 
-MIT License - Tự do sử dụng, sửa đổi, phân phối
+- **[QUICK_START.md](QUICK_START.md)** - Hướng dẫn deploy nhanh 3 bước
+- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Cheat sheet lệnh
+- **[RELEASE_NOTES_V7.1.md](RELEASE_NOTES_V7.1.md)** - Chi tiết fixes & improvements
+- **[FEEDBACK_SYNC_V7.1.md](FEEDBACK_SYNC_V7.1.md)** - Hệ thống feedback đồng bộ
+- **[TONE_CONFIG_GUIDE.md](TONE_CONFIG_GUIDE.md)** - Cấu hình âm thanh chi tiết
+
+---
+
+## 🔒 Bảo mật
+
+### Credentials Management
+- ✅ Blynk token trong `config.h` (không commit)
+- ✅ WiFi credentials lưu trong EEPROM (WiFiManager)
+- ✅ Default AP password: `12345678` (nên thay đổi nếu production)
+
+### Best Practices
+```cpp
+// ✅ Đúng: Token trong config.h
+#define BLYNK_AUTH_TOKEN "secret_token_here"
+
+// ❌ Sai: Hardcode trong code
+String token = "secret_token_here"; // Nguy hiểm!
+```
+
+---
+
+## 📋 Roadmap (Future Versions)
+
+- [ ] MQTT support for Home Automation
+- [ ] Remote firmware update (OTA)
+- [ ] Energy consumption monitoring
+- [ ] Advanced scheduling (daily/weekly/monthly)
+- [ ] Automatic WiFi recovery
+- [ ] Mobile app (iOS/Android)
 
 ## 👤 Author
 
-IoT Smart Home Project v6.0
-**Cập nhật:** 23/12/2025
+**ESP8266 Smart Relay Controller**  
+**Version:** 7.1 (Production Ready ✅)  
+**Last Updated:** January 2026
 
 ---
 
-## 🎯 Quick Start
+## 🚀 Quick Links
 
-```bash
-# 1. Edit config
-nano include/config.h  # Set BLYNK_AUTH_TOKEN
-
-# 2. Build & Upload
-pio run -e nodemcuv2 -t upload
-
-# 3. Monitor
-pio device monitor -b 9600
-
-# 4. Test commands
-H              # See help
-R1 ON 21:00   # Schedule relay
-A1 06:00      # Set alarm
-T 12:00       # Set time
-S             # Status
-```
+| Link | Mô tả |
+|------|-------|
+| [QUICK_START.md](QUICK_START.md) | ⚡ 3 bước setup nhanh |
+| [QUICK_REFERENCE.md](QUICK_REFERENCE.md) | 📋 Danh sách lệnh |
+| [RELEASE_NOTES_V7.1.md](RELEASE_NOTES_V7.1.md) | ✅ Chi tiết cải tiến |
+| [FEEDBACK_SYNC_V7.1.md](FEEDBACK_SYNC_V7.1.md) | 🔔 Feedback system |
+| [TONE_CONFIG_GUIDE.md](TONE_CONFIG_GUIDE.md) | 🎵 Âm thanh config |
 
 ---
 
-**Happy Tinkering!** 🚀
-# JosSmartHome
+**Happy Coding!** 🎉
+
+Made with ❤️ for IoT Smart Home
+
